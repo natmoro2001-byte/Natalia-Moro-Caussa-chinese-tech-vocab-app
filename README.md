@@ -22,8 +22,6 @@ A full-stack web application for learning 500+ technical terms in Chinese
 Built to address the gap in technical vocabulary resources for data 
 professionals entering international markets.
 
-## 🔗 Live Demo
-[Try it here](https://tu-usuario.github.io/chinese-tech-vocab-app/)
 
 ## 📚 Vocabulary Coverage
 - Machine Learning & AI
