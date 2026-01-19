@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Aprende Chino IA & Data (500 palabras)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 10px; }
+        .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .header { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; text-align: center; }
+        .header h1 { font-size: 1.5em; margin-bottom: 5px; }
+        .header p { font-size: 0.9em; }
+        .tabs { display: flex; background: #f8f9fa; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .tab { flex: 0 0 auto; min-width: 80px; padding: 12px 8px; text-align: center; cursor: pointer; font-weight: 600; border-bottom: 3px solid transparent; font-size: 0.85em; white-space: nowrap; }
+        .tab.active { background: white; border-bottom-color: #f093fb; color: #f093fb; }
+        .stats { display: flex; justify-content: space-around; background: #f8f9fa; padding: 12px; flex-wrap: wrap; }
+        .stat-item { text-align: center; min-width: 80px; margin: 5px; }
+        .stat-value { font-size: 1.5em; font-weight: bold; color: #f093fb; }
+        .stat-label { color: #6c757d; font-size: 0.85em; }
+        .content { padding: 15px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 0.95em; font-weight: 600; cursor: pointer; margin: 5px; color: white; }
+        .btn-primary { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .btn-success { background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%); }
+        .game-area { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); padding: 20px; border-radius: 15px; margin-top: 15px; }
+        .question { font-size: 1.8em; font-weight: bold; color: #333; text-align: center; margin-bottom: 15px; min-height: 60px; display: flex; align-items: center; justify-content: center; word-break: break-word; }
+        .repetition { text-align: center; margin-bottom: 12px; font-size: 1em; color: #666; font-weight: 600; }
+        .options { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+        .option-btn { padding: 15px 10px; font-size: 1em; background: white; border: 3px solid transparent; border-radius: 10px; cursor: pointer; font-weight: 600; word-break: break-word; }
+        .option-btn:hover:not(:disabled) { border-color: #f093fb; transform: scale(1.05); }
+        .option-btn.correct { background: #56ab2f; color: white; animation: pulse 0.5s; }
+        .option-btn.incorrect { background: #eb3349; color: white; animation: shake 0.5s; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        @keyframes celebrate { 
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.2) rotate(-5deg); }
+            50% { transform: scale(1.3) rotate(5deg); }
+            75% { transform: scale(1.2) rotate(-5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(86, 171, 47, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(86, 171, 47, 0.8), 0 0 30px rgba(86, 171, 47, 0.6); }
+        }
+        .feedback { margin-top: 15px; padding: 12px; border-radius: 10px; font-size: 1em; font-weight: 600; text-align: center; animation: celebrate 0.6s ease; }
+        .feedback.correct { background: linear-gradient(135deg, #d4edda 0%, #a8e063 100%); color: #155724; border: 3px solid #56ab2f; animation: glow 1s ease-in-out infinite; }
+        .feedback.incorrect { background: #f8d7da; color: #721c24; }
+        .game-modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 15px 0; }
+        .game-mode-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px 15px; border-radius: 15px; text-align: center; cursor: pointer; }
+        .game-mode-card h3 { font-size: 1.2em; margin-bottom: 5px; }
+        .game-mode-card p { font-size: 0.9em; }
+        .game-mode-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .hidden { display: none !important; }
+        .empty-state { text-align: center; padding: 30px 15px; color: #6c757d; }
+        .word-list { max-height: 60vh; overflow-y: auto; margin-top: 15px; }
+        .word-item { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); padding: 15px; margin-bottom: 12px; border-radius: 12px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
+        .word-item:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: all 0.3s; }
+        .word-chinese { font-size: 1.5em; font-weight: bold; color: #333; margin-bottom: 6px; }
+        .word-pinyin { font-size: 1em; color: #666; font-style: italic; margin-bottom: 6px; }
+        .word-spanish { font-size: 1em; color: #444; margin-bottom: 10px; font-weight: 600; }
+        .word-breakdown { background: rgba(255,255,255,0.7); padding: 10px; border-radius: 8px; margin-top: 8px; }
+        .character-item { display: inline-block; margin: 4px 8px 4px 0; padding: 6px 10px; background: white; border-radius: 6px; border-left: 4px solid #f093fb; font-size: 0.9em; }
+        .character-han { font-size: 1.2em; font-weight: bold; color: #333; margin-right: 6px; }
+        .character-meaning { font-size: 0.85em; color: #555; }
+        .search-box { width: 100%; padding: 10px; font-size: 1em; border: 2px solid #dee2e6; border-radius: 8px; margin-bottom: 12px; }
+        .list-stats { display: flex; justify-content: space-around; background: #f8f9fa; padding: 12px; border-radius: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .list-stat-item { text-align: center; min-width: 70px; margin: 5px; }
+        .list-stat-value { font-size: 1.3em; font-weight: bold; color: #f093fb; }
+        .list-stat-label { color: #6c757d; font-size: 0.8em; }
+        .word-checkbox { margin-right: 10px; transform: scale(1.2); cursor: pointer; }
+        .word-item-header { display: flex; align-items: flex-start; }
+        .select-buttons { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+        .select-buttons .btn { flex: 1; min-width: 120px; font-size: 0.85em; padding: 10px 12px; }
+        .reader-content { background: #fff8e1; padding: 20px 15px; border-radius: 15px; line-height: 1.8; font-size: 1.1em; margin: 15px 0; }
+        .reader-word { cursor: pointer; border-bottom: 2px dotted #f093fb; transition: all 0.3s; }
+        .reader-word:hover { background: #ffecd2; padding: 2px 4px; border-radius: 4px; }
+        .reader-tooltip { position: relative; display: inline-block; }
+        .reader-tooltip .tooltiptext { visibility: hidden; background-color: #333; color: #fff; text-align: center; border-radius: 6px; padding: 6px 10px; position: absolute; z-index: 1; bottom: 125%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s; font-size: 0.8em; white-space: nowrap; max-width: 200px; }
+        .reader-tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
+        .reader-stats { background: #f8f9fa; padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center; }
+        .reader-title { font-size: 1.5em; font-weight: bold; color: #333; margin-bottom: 12px; text-align: center; }
+        
+        /* Media queries para móvil */
+        @media (max-width: 768px) {
+            body { padding: 5px; }
+            .container { border-radius: 10px; }
+            .header { padding: 15px 10px; }
+            .header h1 { font-size: 1.2em; }
+            .header p { font-size: 0.8em; }
+            .content { padding: 10px; }
+            .tab { font-size: 0.75em; padding: 10px 5px; min-width: 70px; }
+            .stat-value { font-size: 1.2em; }
+            .stat-label { font-size: 0.75em; }
+            .question { font-size: 1.4em; min-height: 50px; }
+            .game-area { padding: 15px; }
+            .options { grid-template-columns: 1fr; gap: 8px; }
+            .option-btn { padding: 12px 8px; font-size: 0.95em; }
+            .game-modes { grid-template-columns: 1fr; gap: 10px; }
+            .game-mode-card { padding: 15px; }
+            .game-mode-card h3 { font-size: 1.1em; }
+            .word-chinese { font-size: 1.3em; }
+            .word-pinyin { font-size: 0.95em; }
+            .word-spanish { font-size: 0.95em; }
+            .character-item { font-size: 0.85em; padding: 5px 8px; margin: 3px 5px 3px 0; }
+            .character-han { font-size: 1.1em; }
+            .character-meaning { font-size: 0.8em; }
+            .btn { font-size: 0.9em; padding: 10px 15px; }
+            .select-buttons .btn { min-width: 100px; font-size: 0.8em; padding: 8px 10px; }
+            .reader-content { font-size: 1em; padding: 15px 10px; line-height: 1.6; }
+            .reader-title { font-size: 1.3em; }
+            .list-stat-value { font-size: 1.2em; }
+            #flashcard { height: 350px !important; }
+            #frontText, #backText { font-size: 2.2em !important; }
+            #frontSubtext, #backSubtext { font-size: 1.2em !important; }
+        }
+        
+        @media (max-width: 480px) {
+            .header h1 { font-size: 1em; }
+            .header p { font-size: 0.75em; }
+            .tab { font-size: 0.7em; padding: 8px 4px; min-width: 60px; }
+            .question { font-size: 1.2em; }
+            .option-btn { font-size: 0.9em; padding: 10px 8px; }
+            .word-chinese { font-size: 1.2em; }
+            .btn { font-size: 0.85em; padding: 8px 12px; }
+            .reader-content { font-size: 0.95em; }
+            #flashcard { height: 300px !important; }
+            #frontText, #backText { font-size: 2em !important; }
+            #frontSubtext, #backSubtext { font-size: 1.1em !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 IA & Data Analysis 📊</h1>
+            <p>500 palabras técnicas en chino</p>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('vocab')">📚 Vocabulario</div>
+            <div class="tab" onclick="switchTab('list')">📋 Lista Completa</div>
+            <div class="tab" onclick="switchTab('flashcards')">📇 Flashcards</div>
+            <div class="tab" onclick="switchTab('readers')">📖 Graded Readers</div>
+            <div class="tab" onclick="switchTab('game')">🎮 Juego</div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item"><div class="stat-value" id="totalWords">0</div><div class="stat-label">Palabras</div></div>
+            <div class="stat-item"><div class="stat-value" id="gamePoints">0</div><div class="stat-label">Puntos</div></div>
+            <div class="stat-item"><div class="stat-value" id="streak">0</div><div class="stat-label">🔥 Racha</div></div>
+        </div>
+        
+        <div class="content">
+            <div class="tab-content active" id="vocab">
+                <button class="btn btn-success" onclick="loadVocab()">📚 Cargar 500 Palabras</button>
+                <div id="vocabEmpty" class="empty-state"><h3>Haz clic para cargar el vocabulario</h3></div>
+            </div>
+            
+            <!-- Tab: Lista Completa -->
+            <div class="tab-content" id="list">
+                <h2 style="color: #333; margin-bottom: 20px;">📋 Lista Completa de Vocabulario</h2>
+                
+                <div id="listEmpty" class="empty-state">
+                    <h3>⚠️ Primero carga el vocabulario en la pestaña "Vocabulario"</h3>
+                </div>
+                
+                <div id="listActive" class="hidden">
+                    <div class="list-stats">
+                        <div class="list-stat-item">
+                            <div class="list-stat-value" id="listTotalWords">0</div>
+                            <div class="list-stat-label">Total palabras</div>
+                        </div>
+                        <div class="list-stat-item">
+                            <div class="list-stat-value" id="listSelected">0</div>
+                            <div class="list-stat-label">Seleccionadas</div>
+                        </div>
+                        <div class="list-stat-item">
+                            <div class="list-stat-value" id="listDisplayed">0</div>
+                            <div class="list-stat-label">Mostrando</div>
+                        </div>
+                    </div>
+                    
+                    <div class="select-buttons">
+                        <button class="btn btn-primary" onclick="selectAll()">✓ Seleccionar Todas</button>
+                        <button class="btn btn-primary" onclick="deselectAll()">✗ Deseleccionar Todas</button>
+                        <button class="btn btn-success" onclick="startFlashcardsFromList()" style="margin-left: auto;">
+                            📇 Estudiar Seleccionadas
+                        </button>
+                    </div>
+                    
+                    <input type="text" id="searchList" class="search-box" placeholder="🔍 Buscar palabra..." 
+                           onkeyup="filterWordList()">
+                    
+                    <div class="word-list" id="wordList"></div>
+                </div>
+            </div>
+            
+            <!-- Tab: Flashcards -->
+            <div class="tab-content" id="flashcards">
+                <div id="flashcardsSetup">
+                    <h2 style="color: #333; margin-bottom: 20px;">📇 Estudia con Flashcards</h2>
+                    <p style="color: #666; margin-bottom: 20px;">
+                        Las flashcards usan las palabras que seleccionaste en la lista. 
+                        <br><strong id="flashcardsInfo">No hay palabras seleccionadas.</strong>
+                    </p>
+                    
+                    <button class="btn btn-primary" onclick="startFlashcardsFromSelection()" style="font-size: 1.1em; padding: 15px 30px;">
+                        🚀 Empezar a Estudiar
+                    </button>
+                </div>
+                
+                <div id="flashcardsActive" class="hidden">
+                    <button class="btn btn-primary" onclick="exitFlashcards()">← Volver</button>
+                    
+                    <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 10px; text-align: center;">
+                        <strong style="font-size: 1.2em; color: #333;">
+                            Flashcard <span id="currentCardNum">1</span> de <span id="totalCards">20</span>
+                        </strong>
+                        <div style="margin-top: 10px; color: #666;">
+                            Palabras estudiadas: <strong id="studiedCount">0</strong>
+                        </div>
+                    </div>
+                    
+                    <div style="perspective: 1000px; margin: 40px auto; max-width: 600px;">
+                        <div id="flashcard" onclick="flipFlashcard()" 
+                             style="position: relative; width: 100%; height: 400px; transition: transform 0.6s; transform-style: preserve-3d; cursor: pointer;">
+                            <div id="flashcardFront" style="position: absolute; width: 100%; height: 100%; backface-visibility: hidden; 
+                                 background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); border-radius: 20px; 
+                                 display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px; 
+                                 box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                                <div id="frontText" style="font-size: 3em; font-weight: bold; color: #333; text-align: center; margin-bottom: 20px;"></div>
+                                <div id="frontSubtext" style="font-size: 1.5em; color: #555; font-style: italic; text-align: center;"></div>
+                                <div style="position: absolute; bottom: 20px; font-size: 0.9em; color: #666; font-style: italic;">
+                                    👆 Haz clic para voltear
+                                </div>
+                            </div>
+                            <div id="flashcardBack" style="position: absolute; width: 100%; height: 100%; backface-visibility: hidden; 
+                                 background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); border-radius: 20px; 
+                                 display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px; 
+                                 box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: rotateY(180deg);">
+                                <div id="backText" style="font-size: 3em; font-weight: bold; color: #333; text-align: center; margin-bottom: 20px;"></div>
+                                <div id="backSubtext" style="font-size: 1.5em; color: #555; font-style: italic; text-align: center;"></div>
+                                <div style="position: absolute; bottom: 20px; font-size: 0.9em; color: #666; font-style: italic;">
+                                    👆 Haz clic para voltear
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: center; gap: 15px; margin: 30px 0;">
+                        <button class="btn btn-primary" onclick="previousFlashcard()">← Anterior</button>
+                        <button class="btn btn-success" onclick="markAsStudied()">✓ Ya la sé</button>
+                        <button class="btn btn-primary" onclick="nextFlashcard()">Siguiente →</button>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 30px;">
+                        <button class="btn btn-success" onclick="finishFlashcards()" style="font-size: 1.1em; padding: 15px 30px;">
+                            🎮 ¡Jugar con estas palabras!
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab: Graded Readers -->
+            <div class="tab-content" id="readers">
+                <h2 style="color: #333; margin-bottom: 20px;">📖 Graded Readers</h2>
+                
+                <div id="readersEmpty" class="empty-state">
+                    <h3>⚠️ Selecciona palabras en la "Lista Completa" para generar historias</h3>
+                </div>
+                
+                <div id="readersActive" class="hidden">
+                    <div class="reader-stats">
+                        <strong style="font-size: 1.1em; color: #333;">
+                            Historia generada con <span id="readerWordCount">0</span> palabras de tu vocabulario
+                        </strong>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="generateNewStory()">🔄 Generar Nueva Historia</button>
+                    
+                    <div class="reader-title" id="readerTitle"></div>
+                    <div class="reader-content" id="readerContent"></div>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 20px;">
+                        <h3 style="color: #333; margin-bottom: 15px;">💡 Vocabulario de la historia</h3>
+                        <div id="readerVocabList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab: Juego -->
+            <div class="tab-content" id="game">
+                <div id="gameEmpty" class="empty-state"><h3>Carga primero el vocabulario</h3></div>
+                
+                <div id="gameModes" class="hidden">
+                    <p style="text-align: center; color: #666; margin-bottom: 15px;">
+                        💡 Cada palabra se repite 3 veces para mejor aprendizaje
+                    </p>
+                    <div class="game-modes">
+                        <div class="game-mode-card" onclick="startGame('chineseToSpanish')">
+                            <h3>🇨🇳 → 🇪🇸</h3><p>Chino a Español</p>
+                        </div>
+                        <div class="game-mode-card" onclick="startGame('spanishToChinese')">
+                            <h3>🇪🇸 → 🇨🇳</h3><p>Español a Chino</p>
+                        </div>
+                        <div class="game-mode-card" onclick="startGame('pinyinToChinese')">
+                            <h3>📝 → 🇨🇳</h3><p>Pinyin a Chino</p>
+                        </div>
+                        <div class="game-mode-card" onclick="startGame('mixed')">
+                            <h3>🎲 Mixto</h3><p>Todos los modos</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="gameActive" class="hidden">
+                    <button class="btn btn-primary" onclick="exitGame()">← Volver</button>
+                    <div class="game-area">
+                        <div class="repetition" id="repetitionIndicator">Repetición 1 de 3</div>
+                        <div class="question" id="gameQuestion"></div>
+                        <div class="options" id="gameOptions"></div>
+                        <div class="feedback hidden" id="gameFeedback"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const VOCAB = [{"chinese":"数据","pinyin":"shùjù","spanish":"datos"},{"chinese":"分析","pinyin":"fēnxī","spanish":"análisis"},{"chinese":"统计","pinyin":"tǒngjì","spanish":"estadística"},{"chinese":"数据分析","pinyin":"shùjù fēnxī","spanish":"análisis de datos"},{"chinese":"数据科学","pinyin":"shùjù kēxué","spanish":"ciencia de datos"},{"chinese":"大数据","pinyin":"dàshùjù","spanish":"big data"},{"chinese":"数据库","pinyin":"shùjùkù","spanish":"base de datos"},{"chinese":"数据挖掘","pinyin":"shùjù wākuè","spanish":"minería de datos"},{"chinese":"机器学习","pinyin":"jīqì xuéxí","spanish":"machine learning"},{"chinese":"人工智能","pinyin":"réngōng zhìnéng","spanish":"inteligencia artificial"},{"chinese":"深度学习","pinyin":"shēndù xuéxí","spanish":"deep learning"},{"chinese":"神经网络","pinyin":"shénjīng wǎngluò","spanish":"red neuronal"},{"chinese":"算法","pinyin":"suànfǎ","spanish":"algoritmo"},{"chinese":"模型","pinyin":"móxíng","spanish":"modelo"},{"chinese":"训练","pinyin":"xùnliàn","spanish":"entrenamiento"},{"chinese":"预测","pinyin":"yùcè","spanish":"predicción"},{"chinese":"分类","pinyin":"fēnlèi","spanish":"clasificación"},{"chinese":"聚类","pinyin":"jùlèi","spanish":"clustering"},{"chinese":"回归","pinyin":"huíguī","spanish":"regresión"},{"chinese":"特征","pinyin":"tèzhēng","spanish":"característica"},{"chinese":"优化","pinyin":"yōuhuà","spanish":"optimización"},{"chinese":"准确率","pinyin":"zhǔnquèlǜ","spanish":"precisión"},{"chinese":"可视化","pinyin":"kěshìhuà","spanish":"visualización"},{"chinese":"图表","pinyin":"túbiǎo","spanish":"gráfico"},{"chinese":"报告","pinyin":"bàogào","spanish":"informe"},{"chinese":"业务","pinyin":"yèwù","spanish":"negocio"},{"chinese":"战略","pinyin":"zhànlüè","spanish":"estrategia"},{"chinese":"决策","pinyin":"juécè","spanish":"decisión"},{"chinese":"效率","pinyin":"xiàolǜ","spanish":"eficiencia"},{"chinese":"目标","pinyin":"mùbiāo","spanish":"objetivo"},{"chinese":"Python","pinyin":"Python","spanish":"Python"},{"chinese":"SQL","pinyin":"SQL","spanish":"SQL"},{"chinese":"云计算","pinyin":"yún jìsuàn","spanish":"computación en la nube"},{"chinese":"自动化","pinyin":"zìdònghuà","spanish":"automatización"},{"chinese":"API","pinyin":"API","spanish":"API"},{"chinese":"变量","pinyin":"biànliàng","spanish":"variable"},{"chinese":"样本","pinyin":"yàngběn","spanish":"muestra"},{"chinese":"趋势","pinyin":"qūshì","spanish":"tendencia"},{"chinese":"模式","pinyin":"móshì","spanish":"patrón"},{"chinese":"概率","pinyin":"gàilǜ","spanish":"probabilidad"},{"chinese":"平均值","pinyin":"píngjūnzhí","spanish":"promedio"},{"chinese":"标准差","pinyin":"biāozhǔnchā","spanish":"desviación estándar"},{"chinese":"方差","pinyin":"fāngchā","spanish":"varianza"},{"chinese":"假设检验","pinyin":"jiǎshè jiǎnyàn","spanish":"prueba de hipótesis"},{"chinese":"时间序列","pinyin":"shíjiān xùliè","spanish":"serie temporal"},{"chinese":"柱状图","pinyin":"zhùzhuàngtú","spanish":"gráfico de barras"},{"chinese":"折线图","pinyin":"zhéxiàntú","spanish":"gráfico de líneas"},{"chinese":"散点图","pinyin":"sǎndiǎntú","spanish":"diagrama de dispersión"},{"chinese":"仪表板","pinyin":"yíbiǎobǎn","spanish":"dashboard"},{"chinese":"商业智能","pinyin":"shāngyè zhìnéng","spanish":"business intelligence"},{"chinese":"关键绩效指标","pinyin":"guānjiàn jìxiào zhǐbiāo","spanish":"KPI"},{"chinese":"数据仓库","pinyin":"shùjù cāngkù","spanish":"data warehouse"},{"chinese":"数据清洗","pinyin":"shùjù qīngxǐ","spanish":"limpieza de datos"},{"chinese":"数据处理","pinyin":"shùjù chǔlǐ","spanish":"procesamiento de datos"},{"chinese":"ETL","pinyin":"ETL","spanish":"ETL"},{"chinese":"查询","pinyin":"cháxún","spanish":"consulta"},{"chinese":"关系数据库","pinyin":"guānxì shùjùkù","spanish":"base de datos relacional"},{"chinese":"表","pinyin":"biǎo","spanish":"tabla"},{"chinese":"列","pinyin":"liè","spanish":"columna"},{"chinese":"行","pinyin":"háng","spanish":"fila"},{"chinese":"索引","pinyin":"suǒyǐn","spanish":"índice"},{"chinese":"备份","pinyin":"bèifèn","spanish":"backup"},{"chinese":"监督学习","pinyin":"jiāndū xuéxí","spanish":"aprendizaje supervisado"},{"chinese":"无监督学习","pinyin":"wú jiāndū xuéxí","spanish":"aprendizaje no supervisado"},{"chinese":"强化学习","pinyin":"qiánghuà xuéxí","spanish":"aprendizaje por refuerzo"},{"chinese":"特征工程","pinyin":"tèzhēng gōngchéng","spanish":"ingeniería de características"},{"chinese":"降维","pinyin":"jiàngwéi","spanish":"reducción de dimensionalidad"},{"chinese":"决策树","pinyin":"juécè shù","spanish":"árbol de decisión"},{"chinese":"随机森林","pinyin":"suíjī sēnlín","spanish":"random forest"},{"chinese":"支持向量机","pinyin":"zhīchí xiàngliàng jī","spanish":"SVM"},{"chinese":"朴素贝叶斯","pinyin":"pǔsù bèiyèsī","spanish":"Naive Bayes"},{"chinese":"激活函数","pinyin":"jīhuó hánshù","spanish":"función de activación"},{"chinese":"损失函数","pinyin":"sǔnshī hánshù","spanish":"función de pérdida"},{"chinese":"梯度下降","pinyin":"tīdù xiàjiàng","spanish":"descenso de gradiente"},{"chinese":"反向传播","pinyin":"fǎnxiàng chuánbō","spanish":"backpropagation"},{"chinese":"过拟合","pinyin":"guò nǐhé","spanish":"sobreajuste"},{"chinese":"欠拟合","pinyin":"qiàn nǐhé","spanish":"subajuste"},{"chinese":"权重","pinyin":"quánzhòng","spanish":"peso"},{"chinese":"超参数","pinyin":"chāo cānshù","spanish":"hiperparámetro"},{"chinese":"学习率","pinyin":"xuéxílǜ","spanish":"tasa de aprendizaje"},{"chinese":"迭代","pinyin":"diédài","spanish":"iteración"},{"chinese":"验证","pinyin":"yànzhèng","spanish":"validación"},{"chinese":"交叉验证","pinyin":"jiāochā yànzhèng","spanish":"validación cruzada"},{"chinese":"测试集","pinyin":"cèshì jí","spanish":"conjunto de prueba"},{"chinese":"训练集","pinyin":"xùnliàn jí","spanish":"conjunto de entrenamiento"},{"chinese":"召回率","pinyin":"zhàohuílǜ","spanish":"recall"},{"chinese":"精确率","pinyin":"jīngquèlǜ","spanish":"precision"},{"chinese":"F1分数","pinyin":"F1 fēnshù","spanish":"F1 score"},{"chinese":"混淆矩阵","pinyin":"hùnxiáo jǔzhèn","spanish":"matriz de confusión"},{"chinese":"ROC曲线","pinyin":"ROC qūxiàn","spanish":"curva ROC"},{"chinese":"卷积神经网络","pinyin":"juǎnjī shénjīng wǎngluò","spanish":"CNN"},{"chinese":"循环神经网络","pinyin":"xúnhuán shénjīng wǎngluò","spanish":"RNN"},{"chinese":"注意力机制","pinyin":"zhùyìlì jīzhì","spanish":"mecanismo de atención"},{"chinese":"变压器","pinyin":"biànyāqì","spanish":"transformer"},{"chinese":"BERT","pinyin":"BERT","spanish":"BERT"},{"chinese":"GPT","pinyin":"GPT","spanish":"GPT"},{"chinese":"自然语言处理","pinyin":"zìrán yǔyán chǔlǐ","spanish":"NLP"},{"chinese":"文本分析","pinyin":"wénběn fēnxī","spanish":"análisis de texto"},{"chinese":"语言模型","pinyin":"yǔyán móxíng","spanish":"modelo de lenguaje"},{"chinese":"分词","pinyin":"fēncí","spanish":"tokenización"},{"chinese":"情感分析","pinyin":"qínggǎn fēnxī","spanish":"análisis de sentimientos"},{"chinese":"机器翻译","pinyin":"jīqì fānyì","spanish":"traducción automática"},{"chinese":"计算机视觉","pinyin":"jìsuànjī shìjué","spanish":"visión por computadora"},{"chinese":"图像识别","pinyin":"túxiàng shíbié","spanish":"reconocimiento de imágenes"},{"chinese":"目标检测","pinyin":"mùbiāo jiǎncè","spanish":"detección de objetos"},{"chinese":"图像分割","pinyin":"túxiàng fēngē","spanish":"segmentación de imágenes"},{"chinese":"人脸识别","pinyin":"rénliǎn shíbié","spanish":"reconocimiento facial"},{"chinese":"企业","pinyin":"qǐyè","spanish":"empresa"},{"chinese":"客户","pinyin":"kèhù","spanish":"cliente"},{"chinese":"市场","pinyin":"shìchǎng","spanish":"mercado"},{"chinese":"收入","pinyin":"shōurù","spanish":"ingresos"},{"chinese":"成本","pinyin":"chéngběn","spanish":"costo"},{"chinese":"利润","pinyin":"lìrùn","spanish":"beneficio"},{"chinese":"投资回报率","pinyin":"tóuzī huíbàolǜ","spanish":"ROI"},{"chinese":"增长","pinyin":"zēngzhǎng","spanish":"crecimiento"},{"chinese":"风险","pinyin":"fēngxiǎn","spanish":"riesgo"},{"chinese":"软件","pinyin":"ruǎnjiàn","spanish":"software"},{"chinese":"编程","pinyin":"biānchéng","spanish":"programación"},{"chinese":"代码","pinyin":"dàimǎ","spanish":"código"},{"chinese":"框架","pinyin":"kuàngjià","spanish":"framework"},{"chinese":"库","pinyin":"kù","spanish":"biblioteca"},{"chinese":"接口","pinyin":"jiēkǒu","spanish":"interfaz"},{"chinese":"云平台","pinyin":"yún píngtái","spanish":"plataforma en la nube"},{"chinese":"服务器","pinyin":"fúwùqì","spanish":"servidor"},{"chinese":"容器","pinyin":"róngqì","spanish":"contenedor"},{"chinese":"Docker","pinyin":"Docker","spanish":"Docker"},{"chinese":"GPU","pinyin":"GPU","spanish":"GPU"},{"chinese":"版本控制","pinyin":"bǎnběn kòngzhì","spanish":"control de versiones"},{"chinese":"Git","pinyin":"Git","spanish":"Git"},{"chinese":"部署","pinyin":"bùshǔ","spanish":"despliegue"},{"chinese":"测试","pinyin":"cèshì","spanish":"prueba"},{"chinese":"调试","pinyin":"tiáoshì","spanish":"depuración"},{"chinese":"监控","pinyin":"jiānkòng","spanish":"monitoreo"},{"chinese":"性能","pinyin":"xìngnéng","spanish":"rendimiento"},{"chinese":"安全","pinyin":"ānquán","spanish":"seguridad"},{"chinese":"加密","pinyin":"jiāmì","spanish":"encriptación"},{"chinese":"认证","pinyin":"rènzhèng","spanish":"autenticación"},{"chinese":"敏捷","pinyin":"mǐnjié","spanish":"ágil"},{"chinese":"DevOps","pinyin":"DevOps","spanish":"DevOps"},{"chinese":"CI/CD","pinyin":"CI/CD","spanish":"CI/CD"},{"chinese":"流程","pinyin":"liúchéng","spanish":"proceso"},{"chinese":"实时分析","pinyin":"shíshí fēnxī","spanish":"análisis en tiempo real"},{"chinese":"批处理","pinyin":"pī chǔlǐ","spanish":"procesamiento por lotes"},{"chinese":"数据流","pinyin":"shùjù liú","spanish":"flujo de datos"},{"chinese":"数据管道","pinyin":"shùjù guǎndào","spanish":"pipeline de datos"},{"chinese":"NoSQL","pinyin":"NoSQL","spanish":"NoSQL"},{"chinese":"主键","pinyin":"zhǔjiàn","spanish":"clave primaria"},{"chinese":"外键","pinyin":"wàijiàn","spanish":"clave externa"},{"chinese":"视图","pinyin":"shìtú","spanish":"vista"},{"chinese":"事务","pinyin":"shìwù","spanish":"transacción"},{"chinese":"集群","pinyin":"jíqún","spanish":"clúster"},{"chinese":"迁移学习","pinyin":"qiānyí xuéxí","spanish":"transfer learning"},{"chinese":"集成学习","pinyin":"jíchéng xuéxí","spanish":"ensemble learning"},{"chinese":"特征选择","pinyin":"tèzhēng xuǎnzé","spanish":"selección de características"},{"chinese":"特征提取","pinyin":"tèzhēng tíqǔ","spanish":"extracción de características"},{"chinese":"主成分分析","pinyin":"zhǔ chéngfèn fēnxī","spanish":"PCA"},{"chinese":"分类器","pinyin":"fēnlèiqì","spanish":"clasificador"},{"chinese":"k近邻","pinyin":"k jìnlín","spanish":"k-NN"},{"chinese":"梯度提升","pinyin":"tīdù tíshēng","spanish":"gradient boosting"},{"chinese":"感知机","pinyin":"gǎnzhījī","spanish":"perceptrón"},{"chinese":"目标函数","pinyin":"mùbiāo hánshù","spanish":"función objetivo"},{"chinese":"优化器","pinyin":"yōuhuàqì","spanish":"optimizador"},{"chinese":"随机梯度下降","pinyin":"suíjī tīdù xiàjiàng","spanish":"SGD"},{"chinese":"正则化","pinyin":"zhèngzéhuà","spanish":"regularización"},{"chinese":"偏差","pinyin":"piānchā","spanish":"sesgo"},{"chinese":"偏置","pinyin":"piānzhì","spanish":"bias"},{"chinese":"批量大小","pinyin":"pīliàng dàxiǎo","spanish":"tamaño de lote"},{"chinese":"轮次","pinyin":"lúncì","spanish":"época"},{"chinese":"收敛","pinyin":"shōuliǎn","spanish":"convergencia"},{"chinese":"验证集","pinyin":"yànzhèng jí","spanish":"conjunto de validación"},{"chinese":"真阳性","pinyin":"zhēn yángxìng","spanish":"verdadero positivo"},{"chinese":"假阳性","pinyin":"jiǎ yángxìng","spanish":"falso positivo"},{"chinese":"真阴性","pinyin":"zhēn yīnxìng","spanish":"verdadero negativo"},{"chinese":"假阴性","pinyin":"jiǎ yīnxìng","spanish":"falso negativo"},{"chinese":"AUC","pinyin":"AUC","spanish":"AUC"},{"chinese":"基准","pinyin":"jīzhǔn","spanish":"baseline"},{"chinese":"泛化","pinyin":"fànhuà","spanish":"generalización"},{"chinese":"数据增强","pinyin":"shùjù zēngqiáng","spanish":"aumento de datos"},{"chinese":"dropout","pinyin":"dropout","spanish":"dropout"},{"chinese":"批归一化","pinyin":"pī guīyīhuà","spanish":"batch normalization"},{"chinese":"池化","pinyin":"chíhuà","spanish":"pooling"},{"chinese":"最大池化","pinyin":"zuìdà chíhuà","spanish":"max pooling"},{"chinese":"卷积","pinyin":"juǎnjī","spanish":"convolución"},{"chinese":"卷积层","pinyin":"juǎnjī céng","spanish":"capa convolucional"},{"chinese":"全连接层","pinyin":"quán liánjiē céng","spanish":"capa totalmente conectada"},{"chinese":"隐藏层","pinyin":"yǐncáng céng","spanish":"capa oculta"},{"chinese":"输入层","pinyin":"shūrù céng","spanish":"capa de entrada"},{"chinese":"输出层","pinyin":"shūchū céng","spanish":"capa de salida"},{"chinese":"激活","pinyin":"jīhuó","spanish":"activación"},{"chinese":"ReLU","pinyin":"ReLU","spanish":"ReLU"},{"chinese":"Sigmoid","pinyin":"Sigmoid","spanish":"Sigmoid"},{"chinese":"Softmax","pinyin":"Softmax","spanish":"Softmax"},{"chinese":"长短期记忆","pinyin":"cháng duǎnqī jìyì","spanish":"LSTM"},{"chinese":"自注意力","pinyin":"zì zhùyìlì","spanish":"self-attention"},{"chinese":"生成对抗网络","pinyin":"shēngchéng duìkàng wǎngluò","spanish":"GAN"},{"chinese":"自编码器","pinyin":"zì biānmǎqì","spanish":"autoencoder"},{"chinese":"预训练","pinyin":"yù xùnliàn","spanish":"preentrenamiento"},{"chinese":"微调","pinyin":"wēidiào","spanish":"fine-tuning"},{"chinese":"提示","pinyin":"tíshì","spanish":"prompt"},{"chinese":"提示工程","pinyin":"tíshì gōngchéng","spanish":"prompt engineering"},{"chinese":"嵌入","pinyin":"qiànrù","spanish":"embedding"},{"chinese":"词嵌入","pinyin":"cí qiànrù","spanish":"word embedding"},{"chinese":"向量","pinyin":"xiàngliàng","spanish":"vector"},{"chinese":"张量","pinyin":"zhāngliàng","spanish":"tensor"},{"chinese":"矩阵","pinyin":"jǔzhèn","spanish":"matriz"},{"chinese":"编码器","pinyin":"biānmǎqì","spanish":"encoder"},{"chinese":"解码器","pinyin":"jiěmǎqì","spanish":"decoder"},{"chinese":"序列到序列","pinyin":"xùliè dào xùliè","spanish":"sequence-to-sequence"},{"chinese":"采样","pinyin":"cǎiyàng","spanish":"sampling"},{"chinese":"温度","pinyin":"wēndù","spanish":"temperature"},{"chinese":"top-k","pinyin":"top-k","spanish":"top-k"},{"chinese":"困惑度","pinyin":"kùnhuòdù","spanish":"perplexity"},{"chinese":"对比学习","pinyin":"duìbǐ xuéxí","spanish":"aprendizaje contrastivo"},{"chinese":"知识蒸馏","pinyin":"zhīshi zhēngliú","spanish":"destilación de conocimiento"},{"chinese":"量化","pinyin":"liànghuà","spanish":"cuantización"},{"chinese":"剪枝","pinyin":"jiǎnzhī","spanish":"pruning"},{"chinese":"压缩","pinyin":"yāsuō","spanish":"compresión"},{"chinese":"加速","pinyin":"jiāsù","spanish":"aceleración"},{"chinese":"文本挖掘","pinyin":"wénběn wākuè","spanish":"minería de texto"},{"chinese":"大语言模型","pinyin":"dà yǔyán móxíng","spanish":"LLM"},{"chinese":"词性标注","pinyin":"cíxìng biāozhù","spanish":"etiquetado POS"},{"chinese":"命名实体识别","pinyin":"mìngmíng shítǐ shíbié","spanish":"NER"},{"chinese":"文本分类","pinyin":"wénběn fēnlèi","spanish":"clasificación de texto"},{"chinese":"主题建模","pinyin":"zhǔtí jiànmó","spanish":"modelado de tópicos"},{"chinese":"语义分析","pinyin":"yǔyì fēnxī","spanish":"análisis semántico"},{"chinese":"问答系统","pinyin":"wèndá xìtǒng","spanish":"sistema Q&A"},{"chinese":"对话系统","pinyin":"duìhuà xìtǒng","spanish":"sistema de diálogo"},{"chinese":"聊天机器人","pinyin":"liáotiān jīqìrén","spanish":"chatbot"},{"chinese":"语音识别","pinyin":"yǔyīn shíbié","spanish":"reconocimiento de voz"},{"chinese":"文本生成","pinyin":"wénběn shēngchéng","spanish":"generación de texto"},{"chinese":"摘要","pinyin":"zhāiyào","spanish":"resumen"},{"chinese":"信息提取","pinyin":"xìnxī tíqǔ","spanish":"extracción de información"},{"chinese":"知识图谱","pinyin":"zhīshi túpǔ","spanish":"grafo de conocimiento"},{"chinese":"语料库","pinyin":"yǔliàokù","spanish":"corpus"},{"chinese":"TF-IDF","pinyin":"TF-IDF","spanish":"TF-IDF"},{"chinese":"图像处理","pinyin":"túxiàng chǔlǐ","spanish":"procesamiento de imágenes"},{"chinese":"图像分类","pinyin":"túxiàng fēnlèi","spanish":"clasificación de imágenes"},{"chinese":"语义分割","pinyin":"yǔyì fēngē","spanish":"segmentación semántica"},{"chinese":"人脸检测","pinyin":"rénliǎn jiǎncè","spanish":"detección facial"},{"chinese":"物体跟踪","pinyin":"wùtǐ gēnzōng","spanish":"seguimiento de objetos"},{"chinese":"姿态估计","pinyin":"zītài gūjì","spanish":"estimación de pose"},{"chinese":"光学字符识别","pinyin":"guāngxué zìfú shíbié","spanish":"OCR"},{"chinese":"图像增强","pinyin":"túxiàng zēngqiáng","spanish":"mejora de imagen"},{"chinese":"边缘检测","pinyin":"biānyuán jiǎncè","spanish":"detección de bordes"},{"chinese":"ResNet","pinyin":"ResNet","spanish":"ResNet"},{"chinese":"YOLO","pinyin":"YOLO","spanish":"YOLO"},{"chinese":"图像生成","pinyin":"túxiàng shēngchéng","spanish":"generación de imágenes"},{"chinese":"扩散模型","pinyin":"kuòsàn móxíng","spanish":"modelo de difusión"},{"chinese":"多模态","pinyin":"duō mótài","spanish":"multimodal"},{"chinese":"特征图","pinyin":"tèzhēng tú","spanish":"mapa de características"},{"chinese":"商业","pinyin":"shāngyè","spanish":"comercial"},{"chinese":"策略","pinyin":"cèlüè","spanish":"táctica"},{"chinese":"洞察","pinyin":"dòngchá","spanish":"insight"},{"chinese":"效能","pinyin":"xiàonéng","spanish":"efectividad"},{"chinese":"生产力","pinyin":"shēngchǎnlì","spanish":"productividad"},{"chinese":"绩效","pinyin":"jìxiào","spanish":"rendimiento"},{"chinese":"结果","pinyin":"jiéguǒ","spanish":"resultado"},{"chinese":"价值","pinyin":"jiàzhí","spanish":"valor"},{"chinese":"预算","pinyin":"yùsuàn","spanish":"presupuesto"},{"chinese":"市场份额","pinyin":"shìchǎng fèn'é","spanish":"cuota de mercado"},{"chinese":"用户","pinyin":"yònghù","spanish":"usuario"},{"chinese":"转化率","pinyin":"zhuǎnhuàlǜ","spanish":"tasa de conversión"},{"chinese":"留存率","pinyin":"liúcúnlǜ","spanish":"tasa de retención"},{"chinese":"增长率","pinyin":"zēngzhǎnglǜ","spanish":"tasa de crecimiento"},{"chinese":"扩展","pinyin":"kuòzhǎn","spanish":"expansión"},{"chinese":"竞争","pinyin":"jìngzhēng","spanish":"competencia"},{"chinese":"优势","pinyin":"yōushì","spanish":"ventaja"},{"chinese":"机会","pinyin":"jīhuì","spanish":"oportunidad"},{"chinese":"威胁","pinyin":"wēixié","spanish":"amenaza"},{"chinese":"R语言","pinyin":"R yǔyán","spanish":"lenguaje R"},{"chinese":"Java","pinyin":"Java","spanish":"Java"},{"chinese":"JavaScript","pinyin":"JavaScript","spanish":"JavaScript"},{"chinese":"Excel","pinyin":"Excel","spanish":"Excel"},{"chinese":"脚本","pinyin":"jiǎoběn","spanish":"script"},{"chinese":"模块","pinyin":"mókuài","spanish":"módulo"},{"chinese":"应用程序","pinyin":"yìngyòng chéngxù","spanish":"aplicación"},{"chinese":"REST","pinyin":"REST","spanish":"REST"},{"chinese":"AWS","pinyin":"AWS","spanish":"AWS"},{"chinese":"Azure","pinyin":"Azure","spanish":"Azure"},{"chinese":"Kubernetes","pinyin":"Kubernetes","spanish":"Kubernetes"},{"chinese":"虚拟机","pinyin":"xūnǐjī","spanish":"máquina virtual"},{"chinese":"分布式计算","pinyin":"fēnbùshì jìsuàn","spanish":"computación distribuida"},{"chinese":"并行处理","pinyin":"bìngxíng chǔlǐ","spanish":"procesamiento paralelo"},{"chinese":"TPU","pinyin":"TPU","spanish":"TPU"},{"chinese":"硬件加速","pinyin":"yìngjiàn jiāsù","spanish":"aceleración de hardware"},{"chinese":"GitHub","pinyin":"GitHub","spanish":"GitHub"},{"chinese":"仓库","pinyin":"cāngkù","spanish":"repositorio"},{"chinese":"分支","pinyin":"fēnzhī","spanish":"branch"},{"chinese":"合并","pinyin":"hébìng","spanish":"merge"},{"chinese":"环境","pinyin":"huánjìng","spanish":"entorno"},{"chinese":"依赖","pinyin":"yīlài","spanish":"dependencia"},{"chinese":"生产环境","pinyin":"shēngchǎn huánjìng","spanish":"entorno de producción"},{"chinese":"开发环境","pinyin":"kāifā huánjìng","spanish":"entorno de desarrollo"},{"chinese":"单元测试","pinyin":"dānyuán cèshì","spanish":"prueba unitaria"},{"chinese":"日志","pinyin":"rìzhì","spanish":"log"},{"chinese":"延迟","pinyin":"yánchí","spanish":"latencia"},{"chinese":"吞吐量","pinyin":"tūntǔliàng","spanish":"throughput"},{"chinese":"负载","pinyin":"fùzài","spanish":"carga"},{"chinese":"扩展性","pinyin":"kuòzhǎnxìng","spanish":"escalabilidad"},{"chinese":"可靠性","pinyin":"kěkàoxìng","spanish":"confiabilidad"},{"chinese":"可用性","pinyin":"kěyòngxìng","spanish":"disponibilidad"},{"chinese":"容错","pinyin":"róngcuò","spanish":"tolerancia a fallos"},{"chinese":"故障转移","pinyin":"gùzhàng zhuǎnyí","spanish":"failover"},{"chinese":"隐私","pinyin":"yǐnsī","spanish":"privacidad"},{"chinese":"授权","pinyin":"shòuquán","spanish":"autorización"},{"chinese":"访问控制","pinyin":"fǎngwèn kòngzhì","spanish":"control de acceso"},{"chinese":"防火墙","pinyin":"fánghuǒqiáng","spanish":"firewall"},{"chinese":"漏洞","pinyin":"lòudòng","spanish":"vulnerabilidad"},{"chinese":"补丁","pinyin":"bǔdīng","spanish":"parche"},{"chinese":"合规","pinyin":"héguī","spanish":"cumplimiento"},{"chinese":"审计","pinyin":"shěnjì","spanish":"auditoría"},{"chinese":"治理","pinyin":"zhìlǐ","spanish":"gobernanza"},{"chinese":"工作流","pinyin":"gōngzuòliú","spanish":"flujo de trabajo"},{"chinese":"方法","pinyin":"fāngfǎ","spanish":"método"},{"chinese":"方法论","pinyin":"fāngfǎlùn","spanish":"metodología"},{"chinese":"Scrum","pinyin":"Scrum","spanish":"Scrum"},{"chinese":"看板","pinyin":"kànbǎn","spanish":"Kanban"},{"chinese":"MLOps","pinyin":"MLOps","spanish":"MLOps"},{"chinese":"持续集成","pinyin":"chíxù jíchéng","spanish":"integración continua"},{"chinese":"持续交付","pinyin":"chíxù jiāofù","spanish":"entrega continua"},{"chinese":"异常值","pinyin":"yìchángzhí","spanish":"valor atípico"},{"chinese":"相关性","pinyin":"xiāngguānxìng","spanish":"correlación"},{"chinese":"因果关系","pinyin":"yīnguǒ guānxì","spanish":"causalidad"},{"chinese":"分布","pinyin":"fēnbù","spanish":"distribución"},{"chinese":"频率","pinyin":"pínlǜ","spanish":"frecuencia"},{"chinese":"中位数","pinyin":"zhōngwèishù","spanish":"mediana"},{"chinese":"众数","pinyin":"zhòngshù","spanish":"moda"},{"chinese":"百分位数","pinyin":"bǎifēnwèishù","spanish":"percentil"},{"chinese":"四分位数","pinyin":"sìfēnwèishù","spanish":"cuartil"},{"chinese":"置信区间","pinyin":"zhìxìn qūjiān","spanish":"intervalo de confianza"},{"chinese":"显著性","pinyin":"xiǎnzhùxìng","spanish":"significancia"},{"chinese":"p值","pinyin":"p zhí","spanish":"valor p"},{"chinese":"线性回归","pinyin":"xiànxìng huíguī","spanish":"regresión lineal"},{"chinese":"逻辑回归","pinyin":"luójí huíguī","spanish":"regresión logística"},{"chinese":"多元回归","pinyin":"duōyuán huíguī","spanish":"regresión múltiple"},{"chinese":"预报","pinyin":"yùbào","spanish":"pronóstico"},{"chinese":"估计","pinyin":"gūjì","spanish":"estimación"},{"chinese":"推断","pinyin":"tuīduàn","spanish":"inferencia"},{"chinese":"饼图","pinyin":"bǐngtú","spanish":"gráfico circular"},{"chinese":"箱线图","pinyin":"xiāngxiàntú","spanish":"diagrama de caja"},{"chinese":"热图","pinyin":"rètú","spanish":"mapa de calor"},{"chinese":"直方图","pinyin":"zhífāngtú","spanish":"histograma"},{"chinese":"度量","pinyin":"dùliàng","spanish":"métrica"},{"chinese":"描述性分析","pinyin":"miáoshùxìng fēnxī","spanish":"análisis descriptivo"},{"chinese":"诊断性分析","pinyin":"zhěnduànxìng fēnxī","spanish":"análisis diagnóstico"},{"chinese":"预测性分析","pinyin":"yùcèxìng fēnxī","spanish":"análisis predictivo"},{"chinese":"规范性分析","pinyin":"guīfànxìng fēnxī","spanish":"análisis prescriptivo"},{"chinese":"流式处理","pinyin":"liúshì chǔlǐ","spanish":"procesamiento de flujo"},{"chinese":"提取","pinyin":"tíqǔ","spanish":"extracción"},{"chinese":"转换","pinyin":"zhuǎnhuàn","spanish":"transformación"},{"chinese":"加载","pinyin":"jiāzài","spanish":"carga"},{"chinese":"非关系数据库","pinyin":"fēi guānxì shùjùkù","spanish":"base de datos no relacional"},{"chinese":"存储过程","pinyin":"cúnchǔ guòchéng","spanish":"procedimiento almacenado"},{"chinese":"触发器","pinyin":"chùfāqì","spanish":"trigger"},{"chinese":"恢复","pinyin":"huīfù","spanish":"recuperación"},{"chinese":"分区","pinyin":"fēnqū","spanish":"partición"},{"chinese":"分片","pinyin":"fēnpiàn","spanish":"sharding"},{"chinese":"复制","pinyin":"fùzhì","spanish":"replicación"},{"chinese":"云数据库","pinyin":"yún shùjùkù","spanish":"base de datos en la nube"},{"chinese":"数据湖","pinyin":"shùjù hú","spanish":"data lake"},{"chinese":"数据治理","pinyin":"shùjù zhìlǐ","spanish":"gobernanza de datos"},{"chinese":"学习","pinyin":"xuéxí","spanish":"aprendizaje"},{"chinese":"半监督学习","pinyin":"bàn jiāndū xuéxí","spanish":"aprendizaje semi-supervisado"},{"chinese":"在线学习","pinyin":"zàixiàn xuéxí","spanish":"aprendizaje en línea"},{"chinese":"批量学习","pinyin":"pīliàng xuéxí","spanish":"aprendizaje por lotes"}];
+        
+        // Diccionario de significados de caracteres chinos comunes
+        const CHARACTER_MEANINGS = {
+            '数': 'número/contar',
+            '据': 'según/basarse en',
+            '分': 'dividir/separar',
+            '析': 'analizar/dividir',
+            '统': 'reunir/sistema',
+            '计': 'contar/calcular',
+            '科': 'ciencia/rama',
+            '学': 'aprender/estudio',
+            '大': 'grande',
+            '库': 'almacén/depósito',
+            '挖': 'excavar/cavar',
+            '掘': 'desenterrar',
+            '机': 'máquina/mecanismo',
+            '器': 'instrumento/aparato',
+            '习': 'practicar/costumbre',
+            '人': 'persona/humano',
+            '工': 'trabajo/artificial',
+            '智': 'sabiduría/inteligencia',
+            '能': 'poder/capacidad',
+            '深': 'profundo',
+            '度': 'grado/medida',
+            '神': 'espíritu/divino',
+            '经': 'pasar/clásico',
+            '网': 'red',
+            '络': 'red/conectar',
+            '算': 'calcular/contar',
+            '法': 'método/ley',
+            '模': 'modelo/patrón',
+            '型': 'tipo/modelo',
+            '训': 'entrenar/instrucción',
+            '练': 'practicar/entrenar',
+            '预': 'anticipar/preparar',
+            '测': 'medir/predecir',
+            '类': 'categoría/tipo',
+            '聚': 'reunir/juntar',
+            '回': 'regresar/volver',
+            '归': 'regresar/pertenecer',
+            '特': 'especial',
+            '征': 'símbolo/señal',
+            '优': 'excelente/superior',
+            '化': 'cambiar/transformar',
+            '准': 'estándar/preciso',
+            '确': 'seguro/exacto',
+            '率': 'proporción/tasa',
+            '可': 'poder/aprobar',
+            '视': 'ver/mirar',
+            '图': 'imagen/diagrama',
+            '表': 'tabla/expresar',
+            '报': 'informar/reportar',
+            '告': 'decir/anunciar',
+            '业': 'negocio/industria',
+            '务': 'asunto/deber',
+            '战': 'guerra/batalla',
+            '略': 'estrategia/omitir',
+            '决': 'decidir/resolver',
+            '策': 'política/plan',
+            '效': 'efecto/eficacia',
+            '标': 'marca/objetivo',
+            '云': 'nube',
+            '自': 'propio/uno mismo',
+            '动': 'moverse/acción',
+            '变': 'cambiar/transformar',
+            '量': 'cantidad/medir',
+            '样': 'ejemplo/tipo',
+            '本': 'raíz/origen',
+            '趋': 'tender/dirigirse',
+            '势': 'fuerza/tendencia',
+            '式': 'estilo/fórmula',
+            '概': 'general/resumen',
+            '平': 'plano/promedio',
+            '均': 'promedio/igual',
+            '值': 'valor',
+            '差': 'diferencia/error',
+            '方': 'cuadrado/método',
+            '假': 'falso/suponer',
+            '设': 'establecer/instalar',
+            '检': 'inspeccionar/verificar',
+            '验': 'probar/verificar',
+            '时': 'tiempo',
+            '间': 'espacio/intervalo',
+            '序': 'orden/secuencia',
+            '列': 'fila/serie',
+            '柱': 'pilar/columna',
+            '状': 'forma/estado',
+            '折': 'doblar/plegar',
+            '线': 'línea',
+            '散': 'dispersar/soltar',
+            '点': 'punto',
+            '仪': 'instrumento/ceremonia',
+            '板': 'tabla/plancha',
+            '商': 'comercio/negocio',
+            '关': 'relacionado/cerrar',
+            '键': 'clave/tecla',
+            '绩': 'logro/resultado',
+            '指': 'dedo/señalar',
+            '仓': 'almacén/granero',
+            '清': 'claro/limpiar',
+            '洗': 'lavar',
+            '处': 'lugar/manejar',
+            '理': 'razón/manejar',
+            '查': 'investigar/buscar',
+            '询': 'preguntar/consultar',
+            '系': 'sistema/relación',
+            '行': 'fila/caminar',
+            '索': 'buscar/cuerda',
+            '引': 'guiar/atraer',
+            '监': 'supervisar/vigilar',
+            '督': 'supervisar/inspeccionar',
+            '无': 'no/sin',
+            '强': 'fuerte/forzar',
+            '降': 'bajar/descender',
+            '维': 'mantener/dimensión',
+            '树': 'árbol',
+            '随': 'seguir/casual',
+            '森': 'bosque',
+            '林': 'bosque',
+            '支': 'rama/apoyar',
+            '持': 'sostener/mantener',
+            '向': 'dirección/hacia',
+            '朴': 'simple/sincero',
+            '素': 'elemento/simple',
+            '贝': 'concha/dinero',
+            '叶': 'hoja',
+            '斯': 'esto/así',
+            '激': 'estimular/excitar',
+            '活': 'vivir/activo',
+            '函': 'función/carta',
+            '损': 'pérdida/dañar',
+            '失': 'perder',
+            '梯': 'escalera',
+            '反': 'contrario/volver',
+            '传': 'transmitir/pasar',
+            '播': 'sembrar/difundir',
+            '过': 'pasar/exceder',
+            '拟': 'imitar/planear',
+            '合': 'unir/adecuado',
+            '欠': 'deber/carecer',
+            '权': 'poder/derecho',
+            '重': 'pesado/importante',
+            '超': 'superar/ultra',
+            '参': 'participar/consultar',
+            '迭': 'alternar/repetir',
+            '代': 'generación/sustituir',
+            '证': 'prueba/verificar',
+            '交': 'intercambiar/cruzar',
+            '叉': 'cruz/bifurcación',
+            '试': 'probar/intentar',
+            '集': 'reunir/conjunto',
+            '召': 'convocar/llamar',
+            '回': 'regresar',
+            '精': 'refinado/esencia',
+            '混': 'mezclar/confuso',
+            '淆': 'confundir',
+            '矩': 'escuadra/regla',
+            '阵': 'formación/periodo',
+            '曲': 'curva/melodía',
+            '卷': 'enrollar/volumen',
+            '积': 'acumular/producto',
+            '循': 'seguir/ciclo',
+            '环': 'anillo/circular',
+            '注': 'anotar/verter',
+            '意': 'idea/intención',
+            '力': 'fuerza',
+            '制': 'sistema/controlar',
+            '压': 'presionar/oprimir',
+            '器': 'instrumento',
+            '生': 'nacer/vivir',
+            '成': 'completar/éxito',
+            '对': 'correcto/par',
+            '抗': 'resistir/contra',
+            '编': 'tejer/compilar',
+            '码': 'código/número',
+            '解': 'desatar/explicar',
+            '微': 'pequeño/micro',
+            '调': 'ajustar/tono',
+            '提': 'levantar/mencionar',
+            '示': 'mostrar',
+            '嵌': 'incrustar',
+            '入': 'entrar',
+            '词': 'palabra',
+            '量': 'cantidad',
+            '张': 'extender/hoja',
+            '采': 'recoger/adoptar',
+            '温': 'tibio/temperatura',
+            '困': 'atrapado/cansado',
+            '惑': 'confundir/dudar',
+            '比': 'comparar',
+            '知': 'conocer/saber',
+            '识': 'conocimiento',
+            '蒸': 'vapor/cocinar',
+            '馏': 'destilar',
+            '剪': 'cortar/tijeras',
+            '枝': 'rama',
+            '缩': 'contraer/reducir',
+            '加': 'añadir/sumar',
+            '速': 'rápido/velocidad',
+            '文': 'texto/cultura',
+            '挖': 'excavar',
+            '掘': 'cavar/excavar',
+            '言': 'palabra/hablar',
+            '语': 'lenguaje/hablar',
+            '性': 'naturaleza/sexo',
+            '标': 'marca/señal',
+            '注': 'anotar',
+            '命': 'vida/destino',
+            '名': 'nombre/fama',
+            '实': 'real/sólido',
+            '体': 'cuerpo/entidad',
+            '别': 'distinguir/separar',
+            '情': 'sentimiento/situación',
+            '感': 'sentir/emoción',
+            '建': 'construir',
+            '主': 'principal/maestro',
+            '题': 'tema/problema',
+            '义': 'significado/justicia',
+            '句': 'oración/frase',
+            '翻': 'voltear/traducir',
+            '译': 'traducir',
+            '问': 'preguntar',
+            '答': 'responder',
+            '对': 'correcto/par',
+            '话': 'palabra/diálogo',
+            '聊': 'charlar',
+            '音': 'sonido',
+            '摘': 'recoger/extracto',
+            '要': 'importante/querer',
+            '信': 'carta/creer',
+            '息': 'descanso/información',
+            '谱': 'partitura/espectro',
+            '料': 'material/料',
+            '停': 'parar/停',
+            '用': 'usar',
+            '频': 'frecuente',
+            '像': 'imagen/como',
+            '境': 'frontera/condición',
+            '目': 'ojo/objetivo',
+            '割': 'cortar',
+            '脸': 'cara',
+            '物': 'cosa/物',
+            '跟': 'seguir/talón',
+            '踪': 'rastro',
+            '姿': 'postura',
+            '态': 'estado/actitud',
+            '估': 'estimar',
+            '光': 'luz',
+            '字': 'carácter/palabra',
+            '符': 'símbolo/talismán',
+            '增': 'aumentar',
+            '强': 'fuerte',
+            '边': 'borde/lado',
+            '缘': 'borde/destino',
+            '扩': 'expandir',
+            '散': 'dispersar',
+            '模': 'modelo',
+            '态': 'estado',
+            '征': 'característica',
+            '企': 'empresa/esperar',
+            '客': 'invitado/cliente',
+            '户': 'puerta/familia',
+            '场': 'lugar/campo',
+            '收': 'recibir/cosechar',
+            '润': 'húmedo/ganancia',
+            '投': 'lanzar/invertir',
+            '资': 'recursos/capital',
+            '长': 'largo/crecer',
+            '险': 'peligro/riesgo',
+            '软': 'suave/software',
+            '件': 'pieza/artículo',
+            '程': 'proceso/programa',
+            '框': 'marco',
+            '架': 'estante/marco',
+            '接': 'conectar/接',
+            '口': 'boca/puerto',
+            '台': 'plataforma/台',
+            '服': 'ropa/servir',
+            '务': 'asunto/servicio',
+            '容': 'contener/permitir',
+            '版': 'edición/tabla',
+            '控': 'controlar',
+            '署': 'oficina/firmar',
+            '调': '调整/tono',
+            '试': 'prueba',
+            '控': 'controlar',
+            '安': 'seguro/tranquilo',
+            '全': 'todo/completo',
+            '密': 'secreto/denso',
+            '证': 'prueba/certificado',
+            '授': 'enseñar/otorgar',
+            '捷': 'rápido/ágil',
+            '敏': 'ágil/sensible',
+            '程': 'proceso',
+            '实': 'real/sólido',
+            '批': 'lote/批',
+            '流': 'fluir/corriente',
+            '管': 'tubo/管理',
+            '道': 'camino/道',
+            '非': 'no/equivocado',
+            '主': 'principal',
+            '外': 'fuera/外',
+            '存': 'existir/guardar',
+            '储': 'almacenar',
+            '触': 'tocar/触',
+            '发': 'lanzar/发',
+            '恢': 'recuperar',
+            '复': '復/repetir',
+            '区': 'área/区',
+            '片': 'pedazo/rebanada',
+            '群': 'grupo',
+            '湖': 'lago',
+            '治': 'gobernar/curar',
+            '迁': 'migrar',
+            '移': 'mover',
+            '近': 'cerca',
+            '邻': 'vecino',
+            '升': 'subir/升',
+            '偏': 'sesgado/parcial',
+            '置': 'colocar',
+            '批': 'lote',
+            '轮': 'rueda/turno',
+            '次': 'vez/次',
+            '收': 'recoger',
+            '敛': 'recoger/converger',
+            '真': 'verdadero',
+            '阳': 'sol/yang',
+            '阴': 'sombra/yin',
+            '泛': 'flotar/general',
+            '归': '归/归',
+            '池': 'estanque',
+            '最': 'más',
+            '连': 'conectar',
+            '接': '接/conectar',
+            '藏': 'ocultar',
+            '输': 'transportar/perder',
+            '出': 'salir',
+            '前': 'delante/前',
+            '记': '記/记录',
+            '忆': '記憶',
+            '门': 'puerta',
+            '控': 'controlar',
+            '单': 'simple/单',
+            '元': 'origen/元',
+            '当': '當/actual',
+            '嵌': 'incrustar',
+            '序': 'orden',
+            '束': 'atar/束',
+            '搜': 'buscar',
+            '索': 'cuerda/buscar',
+            '贪': 'codicioso',
+            '婪': 'codicioso',
+            '顿': 'repentino',
+            '离': '离/separar',
+            '哈': 'exhalar',
+            '曼': 'largo',
+            '距': 'distancia',
+            '余': 'sobrar/resto',
+            '弦': 'cuerda',
+            '似': '似/similar',
+            '欧': 'Europa',
+            '氏': 'clan',
+            '镜': 'espejo',
+            '余': '余/resto',
+            '欧': 'Europa/歐',
+            '氏': 'clan',
+            '距': 'distancia',
+            '离': '離/separar',
+            '標': 'marca/señal',
+            '負': 'cargar/負',
+            '載': 'cargar/載',
+            '扩': 'expandir',
+            '展': '展/展开',
+            '靠': 'confiar/靠',
+            '错': 'error',
+            '障': 'obstáculo',
+            '故': '故/asunto',
+            '移': 'mover/移',
+            '私': 'privado',
+            '问': 'preguntar',
+            '访': 'visitar',
+            '墙': 'muro',
+            '洞': 'hueco/cueva',
+            '丁': 'clavo/adulto',
+            '规': 'regla',
+            '审': 'examinar',
+            '工': 'trabajo',
+            '流': 'flujo',
+            '方': 'método',
+            '论': 'teoría/論',
+            '板': 'tabla',
+            '续': 'continuar',
+            '交': '交/intercambiar',
+            '付': 'pagar',
+            '异': 'diferente/異',
+            '常': '常/常',
+            '关': '關/關係',
+            '因': '因/因果',
+            '果': '果/fruta',
+            '布': 'tela/布',
+            '中': 'medio/中',
+            '位': '位/posición',
+            '百': 'cien',
+            '四': 'cuatro',
+            '置': 'colocar',
+            '信': '信/creer',
+            '显': '显/mostrar',
+            '著': '著/notable',
+            '性': 'naturaleza',
+            'p': 'p',
+            '报': '報/報告',
+            '估': '估/estimar',
+            '推': '推/推',
+            '断': '斷/斷',
+            '饼': '餅/pastel',
+            '箱': '箱/caja',
+            '热': '熱/calor',
+            '直': '直/recto',
+            '方': '方/cuadrado',
+            '描': '描/describir',
+            '述': '述/narrar',
+            '诊': '診/診',
+            '范': '範/modelo',
+            '规': '規/規',
+            '式': '式/estilo',
+            '非': '非/no',
+            '转': '轉/girar',
+            '换': '換/cambiar',
+            '拉': '拉/tirar',
+            '取': '取/取',
+            '请': '請/请',
+            '求': '求/pedir',
+            '仓': '倉/almacén',
+            '触': '觸/tocar',
+            '恢': '恢/recuperar',
+            '云': '雲/nube',
+            '半': '半/mitad',
+            '在': '在/estar',
+            '并': '並/並',
+            '虚': '虛/虛',
+            '拟': '擬/plan',
+            '布': '布/tela',
+            '吐': '吐/escupir',
+            '硬': '硬/duro',
+            '仓': '倉/almacén',
+            '支': '支/rama',
+            '并': '並/並',
+            '推': '推/empujar',
+            '送': '送/送',
+            '境': '境/境',
+            '赖': '賴/confiar',
+            '产': '產/產',
+            '开': '開/abrir',
+            '元': '元/origen',
+            '志': '志/志',
+            '延': '延/延',
+            '迟': '遲/tarde',
+            '负': '負/负',
+            '靠': '靠/confiar',
+            '障': '障/障',
+            '隐': '隱/ocultar',
+            '密': '密/secreto',
+            '权': '權/derecho',
+            '防': '防/防',
+            '侵': '侵/侵',
+            '漏': '漏/filtrar',
+            '补': '補/補',
+            '合': '合/unir',
+            '审': '審/审',
+            '治': '治/治',
+            '看': '看/ver',
+            '论': '論/teoría',
+            '看': '看/Kanban',
+            '续': '續/continuar',
+            '付': '付/pagar'
+        };
+        
+        
+        let vocab = [];
+        let gameState = { points: 0, streak: 0 };
+        let studiedWords = []; // Palabras estudiadas en flashcards
+        let selectedWords = []; // Palabras seleccionadas en la lista
+        let flashcardPool = []; // Pool actual de flashcards
+        let currentFlashcardIndex = 0;
+        let currentMode = null;
+        let currentWord = null;
+        let currentRepetition = 1;
+        let questionsAsked = 0;
+        let isFlashcardFlipped = false;
+        
+        function loadData() {
+            const saved = localStorage.getItem('chineseGame');
+            if (saved) {
+                const data = JSON.parse(saved);
+                vocab = data.vocab || [];
+                gameState = data.gameState || { points: 0, streak: 0 };
+                studiedWords = data.studiedWords || [];
+                selectedWords = data.selectedWords || [];
+                updateStats();
+            }
+        }
+        
+        function saveData() {
+            localStorage.setItem('chineseGame', JSON.stringify({ vocab, gameState, studiedWords, selectedWords }));
+        }
+        
+        function loadVocab() {
+            vocab = VOCAB;
+            saveData();
+            updateStats();
+            document.getElementById('vocabEmpty').innerHTML = '<h3>✅ 500 palabras cargadas!</h3>';
+            initGame();
+        }
+        
+        function updateStats() {
+            document.getElementById('totalWords').textContent = vocab.length;
+            document.getElementById('gamePoints').textContent = gameState.points;
+            document.getElementById('streak').textContent = gameState.streak;
+        }
+        
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tab).classList.add('active');
+            if (tab === 'game') initGame();
+            if (tab === 'flashcards') initFlashcardsTab();
+            if (tab === 'list') initListTab();
+            if (tab === 'readers') initReadersTab();
+        }
+        
+        function initListTab() {
+            if (vocab.length === 0) {
+                document.getElementById('listEmpty').classList.remove('hidden');
+                document.getElementById('listActive').classList.add('hidden');
+            } else {
+                document.getElementById('listEmpty').classList.add('hidden');
+                document.getElementById('listActive').classList.remove('hidden');
+                renderWordList();
+            }
+        }
+        
+        function getCharacterBreakdown(word) {
+            const chars = word.split('');
+            return chars.map(char => {
+                const meaning = CHARACTER_MEANINGS[char] || '—';
+                return `<div class="character-item"><span class="character-han">${char}</span><span class="character-meaning">${meaning}</span></div>`;
+            }).join('');
+        }
+        
+        function renderWordList(filteredVocab = null) {
+            const wordsToShow = filteredVocab || vocab;
+            document.getElementById('listTotalWords').textContent = vocab.length;
+            document.getElementById('listSelected').textContent = selectedWords.length;
+            document.getElementById('listDisplayed').textContent = wordsToShow.length;
+            
+            const listHtml = wordsToShow.map((word, index) => {
+                const isSelected = selectedWords.some(w => w.chinese === word.chinese);
+                return `
+                <div class="word-item">
+                    <div class="word-item-header">
+                        <input type="checkbox" class="word-checkbox" 
+                               ${isSelected ? 'checked' : ''} 
+                               onchange="toggleWordSelection('${word.chinese.replace(/'/g, "\\'")}')">
+                        <div style="flex: 1;">
+                            <div class="word-chinese">${word.chinese}</div>
+                            <div class="word-pinyin">${word.pinyin}</div>
+                            <div class="word-spanish">${word.spanish}</div>
+                        </div>
+                    </div>
+                    <div class="word-breakdown">
+                        <strong style="font-size: 0.9em; color: #666; display: block; margin-bottom: 8px;">Significado de caracteres:</strong>
+                        ${getCharacterBreakdown(word.chinese)}
+                    </div>
+                </div>
+            `}).join('');
+            
+            document.getElementById('wordList').innerHTML = listHtml;
+        }
+        
+        function toggleWordSelection(chinese) {
+            const word = vocab.find(w => w.chinese === chinese);
+            if (!word) return;
+            
+            const index = selectedWords.findIndex(w => w.chinese === chinese);
+            if (index > -1) {
+                selectedWords.splice(index, 1);
+            } else {
+                selectedWords.push(word);
+            }
+            
+            document.getElementById('listSelected').textContent = selectedWords.length;
+            saveData();
+        }
+        
+        function selectAll() {
+            selectedWords = [...vocab];
+            saveData();
+            renderWordList();
+        }
+        
+        function deselectAll() {
+            selectedWords = [];
+            saveData();
+            renderWordList();
+        }
+        
+        function startFlashcardsFromList() {
+            if (selectedWords.length === 0) {
+                alert('⚠️ Selecciona al menos una palabra primero');
+                return;
+            }
+            
+            // Cambiar a la pestaña de flashcards
+            document.querySelectorAll('.tab')[2].click();
+        }
+        
+        function filterWordList() {
+            const searchTerm = document.getElementById('searchList').value.toLowerCase();
+            if (!searchTerm) {
+                renderWordList();
+                return;
+            }
+            
+            const filtered = vocab.filter(word => 
+                word.chinese.includes(searchTerm) ||
+                word.pinyin.toLowerCase().includes(searchTerm) ||
+                word.spanish.toLowerCase().includes(searchTerm)
+            );
+            
+            renderWordList(filtered);
+        }
+        
+        function initFlashcardsTab() {
+            if (vocab.length === 0) {
+                document.getElementById('flashcardsSetup').innerHTML = '<div class="empty-state"><h3>⚠️ Primero carga el vocabulario en la pestaña "Vocabulario"</h3></div>';
+            } else {
+                const infoText = selectedWords.length > 0 
+                    ? `Tienes ${selectedWords.length} palabras seleccionadas para estudiar.`
+                    : 'No hay palabras seleccionadas. Ve a "Lista Completa" para seleccionar palabras.';
+                document.getElementById('flashcardsInfo').textContent = infoText;
+            }
+        }
+        
+        function startFlashcardsFromSelection() {
+            if (selectedWords.length === 0) {
+                alert('⚠️ Primero selecciona palabras en la pestaña "Lista Completa"');
+                return;
+            }
+            
+            flashcardPool = [...selectedWords];
+            currentFlashcardIndex = 0;
+            
+            // Marcar todas como no estudiadas al inicio
+            flashcardPool.forEach(w => w.studied = false);
+            
+            document.getElementById('flashcardsSetup').classList.add('hidden');
+            document.getElementById('flashcardsActive').classList.remove('hidden');
+            document.getElementById('totalCards').textContent = flashcardPool.length;
+            
+            showFlashcard();
+        }
+        
+        function showFlashcard() {
+            if (flashcardPool.length === 0) return;
+            
+            const word = flashcardPool[currentFlashcardIndex];
+            isFlashcardFlipped = false;
+            
+            document.getElementById('flashcard').style.transform = 'rotateY(0deg)';
+            document.getElementById('currentCardNum').textContent = currentFlashcardIndex + 1;
+            
+            // Mostrar chino en el frente
+            document.getElementById('frontText').textContent = word.chinese;
+            document.getElementById('frontSubtext').textContent = word.pinyin;
+            
+            // Mostrar español en el reverso
+            document.getElementById('backText').textContent = word.spanish;
+            document.getElementById('backSubtext').textContent = `${word.chinese} (${word.pinyin})`;
+            
+            updateStudiedCount();
+        }
+        
+        function flipFlashcard() {
+            isFlashcardFlipped = !isFlashcardFlipped;
+            const card = document.getElementById('flashcard');
+            card.style.transform = isFlashcardFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
+        }
+        
+        function nextFlashcard() {
+            if (currentFlashcardIndex < flashcardPool.length - 1) {
+                currentFlashcardIndex++;
+                showFlashcard();
+            } else {
+                alert('¡Has llegado al final! 🎉');
+            }
+        }
+        
+        function previousFlashcard() {
+            if (currentFlashcardIndex > 0) {
+                currentFlashcardIndex--;
+                showFlashcard();
+            }
+        }
+        
+        function markAsStudied() {
+            flashcardPool[currentFlashcardIndex].studied = true;
+            updateStudiedCount();
+            
+            // Mensaje de confirmación breve
+            const card = document.getElementById('flashcard');
+            const originalTransform = card.style.transform;
+            card.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                card.style.transform = originalTransform;
+            }, 200);
+            
+            // Avanzar automáticamente
+            setTimeout(() => {
+                if (currentFlashcardIndex < flashcardPool.length - 1) {
+                    nextFlashcard();
+                }
+            }, 500);
+        }
+        
+        function updateStudiedCount() {
+            const studied = flashcardPool.filter(w => w.studied).length;
+            document.getElementById('studiedCount').textContent = studied;
+        }
+        
+        function finishFlashcards() {
+            const studied = flashcardPool.filter(w => w.studied);
+            
+            if (studied.length === 0) {
+                if (confirm('No has marcado ninguna palabra como estudiada. ¿Quieres usar todas las flashcards para el juego?')) {
+                    studiedWords = [...flashcardPool];
+                } else {
+                    return;
+                }
+            } else {
+                studiedWords = studied;
+            }
+            
+            saveData();
+            alert(`¡Perfecto! Ahora jugarás con ${studiedWords.length} palabras que estudiaste 🎮`);
+            
+            // Ir a la pestaña de juego
+            document.querySelector('.tab:nth-child(3)').click();
+        }
+        
+        function exitFlashcards() {
+            document.getElementById('flashcardsSetup').classList.remove('hidden');
+            document.getElementById('flashcardsActive').classList.add('hidden');
+        }
+        
+        function initGame() {
+            const wordsToUse = studiedWords.length > 0 ? studiedWords : vocab;
+            
+            if (wordsToUse.length < 4) {
+                document.getElementById('gameEmpty').innerHTML = studiedWords.length > 0 
+                    ? '<div class="empty-state"><h3>⚠️ Necesitas al menos 4 palabras estudiadas</h3></div>'
+                    : '<div class="empty-state"><h3>⚠️ Primero estudia con flashcards o carga el vocabulario</h3></div>';
+                document.getElementById('gameEmpty').classList.remove('hidden');
+                document.getElementById('gameModes').classList.add('hidden');
+            } else {
+                document.getElementById('gameEmpty').classList.add('hidden');
+                document.getElementById('gameModes').classList.remove('hidden');
+                
+                // Actualizar mensaje
+                const infoMsg = studiedWords.length > 0 
+                    ? `💡 Jugarás con las ${studiedWords.length} palabras que estudiaste. Cada palabra se repite 3 veces.`
+                    : '💡 Cada palabra se repite 3 veces para mejor aprendizaje';
+                document.querySelector('#gameModes p').textContent = infoMsg;
+            }
+            document.getElementById('gameActive').classList.add('hidden');
+        }
+        
+        function startGame(mode) {
+            currentMode = mode;
+            currentRepetition = 1;
+            questionsAsked = 0;
+            document.getElementById('gameModes').classList.add('hidden');
+            document.getElementById('gameActive').classList.remove('hidden');
+            nextQuestion();
+        }
+        
+        function exitGame() {
+            document.getElementById('gameActive').classList.add('hidden');
+            document.getElementById('gameModes').classList.remove('hidden');
+        }
+        
+        function nextQuestion() {
+            document.getElementById('gameFeedback').classList.add('hidden');
+            
+            const wordsToUse = studiedWords.length > 0 ? studiedWords : vocab;
+            
+            // Si es una nueva palabra (no una repetición), escoge una nueva
+            if (currentRepetition === 1) {
+                currentWord = wordsToUse[Math.floor(Math.random() * wordsToUse.length)];
+            }
+            
+            // Actualizar indicador de repetición
+            document.getElementById('repetitionIndicator').textContent = `Repetición ${currentRepetition} de 3`;
+            
+            let mode = currentMode;
+            if (mode === 'mixed') {
+                const modes = ['chineseToSpanish', 'spanishToChinese', 'pinyinToChinese'];
+                mode = modes[Math.floor(Math.random() * modes.length)];
+            }
+            
+            let question = '', correct = '';
+            if (mode === 'chineseToSpanish') {
+                question = currentWord.chinese;
+                correct = currentWord.spanish;
+            } else if (mode === 'spanishToChinese') {
+                question = currentWord.spanish;
+                correct = currentWord.chinese;
+            } else {
+                question = currentWord.pinyin;
+                correct = currentWord.chinese;
+            }
+            
+            document.getElementById('gameQuestion').textContent = question;
+            
+            const options = [correct];
+            while (options.length < 4) {
+                const randomWord = wordsToUse[Math.floor(Math.random() * wordsToUse.length)];
+                let opt = '';
+                if (mode === 'chineseToSpanish') opt = randomWord.spanish;
+                else if (mode === 'spanishToChinese') opt = randomWord.chinese;
+                else opt = randomWord.chinese;
+                if (!options.includes(opt)) options.push(opt);
+            }
+            
+            options.sort(() => Math.random() - 0.5);
+            
+            document.getElementById('gameOptions').innerHTML = options.map(opt => 
+                `<button class="option-btn" onclick="checkAnswer('${opt.replace(/'/g, "\\'")}', '${correct.replace(/'/g, "\\'")}')">${opt}</button>`
+            ).join('');
+        }
+        
+        const successMessages = [
+            "¡Excelente! 🌟",
+            "¡Increíble! 🎉",
+            "¡Perfecto! ✨",
+            "¡Genial! 💫",
+            "¡Fantástico! 🚀",
+            "¡Muy bien! 🎯",
+            "¡Impresionante! ⭐",
+            "¡Brillante! 💎",
+            "¡Magnífico! 🏆",
+            "¡Sobresaliente! 🌈",
+            "¡Eres un crack! 💪",
+            "¡Imparable! 🔥",
+            "¡Sigue así! 👏",
+            "¡Lo estás petando! 🎊",
+            "¡Qué máquina! 🤖",
+            "¡Espectacular! ✌️",
+            "¡Eres el mejor! 🥇",
+            "¡Fenomenal! 🎈",
+            "¡Brutal! 💥",
+            "¡Qué nivel! 📈"
+        ];
+        
+        const streakMessages = {
+            5: "¡5 seguidas! Estás on fire 🔥",
+            10: "¡10 seguidas! ¡INCREÍBLE! 🌟🌟",
+            15: "¡15 seguidas! ¡LEYENDA! 👑",
+            20: "¡20 seguidas! ¡DIOS DEL CHINO! 🐉",
+            25: "¡25 seguidas! ¡IMPARABLE! 🚀🚀",
+            30: "¡30 seguidas! ¡MAESTRO ABSOLUTO! 🏆👑"
+        };
+        
+        const repetitionMessages = {
+            1: "¡Primera vez correcta! 💚",
+            2: "¡Segunda vez! Ya la dominas 💙",
+            3: "¡Tercera vez! ¡Palabra DOMINADA! 💜✨"
+        };
+        
+        function checkAnswer(selected, correct) {
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(btn => btn.disabled = true);
+            
+            const feedback = document.getElementById('gameFeedback');
+            feedback.classList.remove('hidden');
+            
+            if (selected === correct) {
+                buttons.forEach(btn => {
+                    if (btn.textContent === selected) btn.classList.add('correct');
+                });
+                
+                const points = 10 + (gameState.streak * 2);
+                gameState.points += points;
+                gameState.streak++;
+                
+                // Mensaje aleatorio de éxito
+                const randomMsg = successMessages[Math.floor(Math.random() * successMessages.length)];
+                
+                // Mensaje especial por racha
+                let streakMsg = '';
+                if (streakMessages[gameState.streak]) {
+                    streakMsg = `<br><strong style="color: #ff6b6b; font-size: 1.2em;">${streakMessages[gameState.streak]}</strong>`;
+                }
+                
+                // Mensaje por repetición
+                const repMsg = repetitionMessages[currentRepetition] || '';
+                
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = `
+                    <strong style="font-size: 1.3em;">${randomMsg}</strong><br>
+                    ${repMsg}<br>
+                    +${points} puntos | Racha: ${gameState.streak} 🔥
+                    ${streakMsg}
+                `;
+                
+                // Incrementar repetición o pasar a nueva palabra
+                currentRepetition++;
+                if (currentRepetition > 3) {
+                    currentRepetition = 1;
+                }
+            } else {
+                buttons.forEach(btn => {
+                    if (btn.textContent === selected) btn.classList.add('incorrect');
+                    if (btn.textContent === correct) btn.classList.add('correct');
+                });
+                
+                gameState.streak = 0;
+                
+                const encouragement = [
+                    "¡No pasa nada! Sigue intentando 💪",
+                    "¡Casi! La próxima vez la tienes 🎯",
+                    "¡Aprendiendo! Cada error es progreso 📚",
+                    "¡Tranquilo! Nadie nace sabiendo 🌱",
+                    "¡Sigue así! Los errores son parte del aprendizaje 🚀"
+                ];
+                const randomEncouragement = encouragement[Math.floor(Math.random() * encouragement.length)];
+                
+                feedback.className = 'feedback incorrect';
+                feedback.innerHTML = `
+                    <strong>${randomEncouragement}</strong><br>
+                    Correcta: <strong>${correct}</strong><br>
+                    <small>${currentWord.chinese} (${currentWord.pinyin}) = ${currentWord.spanish}</small>
+                `;
+                
+                // Reiniciar repeticiones en caso de error
+                currentRepetition = 1;
+            }
+            
+            saveData();
+            updateStats();
+            
+            setTimeout(() => nextQuestion(), 2500);
+        }
+        
+        function initReadersTab() {
+            if (selectedWords.length === 0) {
+                document.getElementById('readersEmpty').classList.remove('hidden');
+                document.getElementById('readersActive').classList.add('hidden');
+            } else {
+                document.getElementById('readersEmpty').classList.add('hidden');
+                document.getElementById('readersActive').classList.remove('hidden');
+                generateStory();
+            }
+        }
+        
+        function generateNewStory() {
+            generateStory();
+        }
+        
+        function generateStory() {
+            const storyTemplates = [
+                {
+                    title: "数据分析师的一天",
+                    template: (words) => {
+                        const story = [];
+                        story.push("小明是一名");
+                        if (words.some(w => w.chinese === "数据分析")) story.push("数据分析");
+                        story.push("师。每天他都要处理很多");
+                        if (words.some(w => w.chinese === "数据")) story.push("数据");
+                        story.push("。他使用");
+                        if (words.some(w => w.chinese === "Python")) story.push("Python");
+                        story.push("和");
+                        if (words.some(w => w.chinese === "SQL")) story.push("SQL");
+                        story.push("来进行");
+                        if (words.some(w => w.chinese === "分析")) story.push("分析");
+                        story.push("。他的工作需要很高的");
+                        if (words.some(w => w.chinese === "准确率")) story.push("准确率");
+                        story.push("。小明喜欢用");
+                        if (words.some(w => w.chinese === "图表")) story.push("图表");
+                        story.push("来");
+                        if (words.some(w => w.chinese === "可视化")) story.push("可视化");
+                        story.push("结果。他的");
+                        if (words.some(w => w.chinese === "报告")) story.push("报告");
+                        story.push("帮助公司做出更好的");
+                        if (words.some(w => w.chinese === "决策")) story.push("决策");
+                        story.push("。");
+                        return story.join("");
+                    }
+                },
+                {
+                    title: "学习人工智能",
+                    template: (words) => {
+                        const story = [];
+                        story.push("小红想学习");
+                        if (words.some(w => w.chinese === "人工智能")) story.push("人工智能");
+                        story.push("。她开始学习");
+                        if (words.some(w => w.chinese === "机器学习")) story.push("机器学习");
+                        story.push("和");
+                        if (words.some(w => w.chinese === "深度学习")) story.push("深度学习");
+                        story.push("。她了解了");
+                        if (words.some(w => w.chinese === "神经网络")) story.push("神经网络");
+                        story.push("的工作原理。她学会了如何");
+                        if (words.some(w => w.chinese === "训练")) story.push("训练");
+                        if (words.some(w => w.chinese === "模型")) story.push("模型");
+                        story.push("。她知道");
+                        if (words.some(w => w.chinese === "算法")) story.push("算法");
+                        story.push("很重要。小红还学习了");
+                        if (words.some(w => w.chinese === "自然语言处理")) story.push("自然语言处理");
+                        story.push("和");
+                        if (words.some(w => w.chinese === "计算机视觉")) story.push("计算机视觉");
+                        story.push("。");
+                        return story.join("");
+                    }
+                },
+                {
+                    title: "数据科学项目",
+                    template: (words) => {
+                        const story = [];
+                        story.push("这个");
+                        if (words.some(w => w.chinese === "数据科学")) story.push("数据科学");
+                        story.push("项目需要进行");
+                        if (words.some(w => w.chinese === "数据清洗")) story.push("数据清洗");
+                        story.push("。团队使用");
+                        if (words.some(w => w.chinese === "数据库")) story.push("数据库");
+                        story.push("来存储信息。他们建立了一个");
+                        if (words.some(w => w.chinese === "预测")) story.push("预测");
+                        if (words.some(w => w.chinese === "模型")) story.push("模型");
+                        story.push("。这个模型的");
+                        if (words.some(w => w.chinese === "准确率")) story.push("准确率");
+                        story.push("很高。他们使用");
+                        if (words.some(w => w.chinese === "可视化")) story.push("可视化");
+                        story.push("来展示结果。最后他们写了一份");
+                        if (words.some(w => w.chinese === "报告")) story.push("报告");
+                        story.push("。这个项目提高了公司的");
+                        if (words.some(w => w.chinese === "效率")) story.push("效率");
+                        story.push("。");
+                        return story.join("");
+                    }
+                }
+            ];
+            
+            const randomTemplate = storyTemplates[Math.floor(Math.random() * storyTemplates.length)];
+            const storyText = randomTemplate.template(selectedWords);
+            
+            // Resaltar palabras del vocabulario
+            let highlightedStory = storyText;
+            selectedWords.forEach(word => {
+                const regex = new RegExp(word.chinese, 'g');
+                highlightedStory = highlightedStory.replace(regex, 
+                    `<span class="reader-tooltip reader-word">${word.chinese}<span class="tooltiptext">${word.pinyin} - ${word.spanish}</span></span>`
+                );
+            });
+            
+            document.getElementById('readerTitle').textContent = randomTemplate.title;
+            document.getElementById('readerContent').innerHTML = highlightedStory;
+            document.getElementById('readerWordCount').textContent = selectedWords.length;
+            
+            // Mostrar vocabulario usado
+            const vocabHtml = selectedWords.map(word => `
+                <div style="background: white; padding: 10px; border-radius: 8px; border-left: 3px solid #f093fb;">
+                    <strong>${word.chinese}</strong> (${word.pinyin})<br>
+                    <span style="color: #666;">${word.spanish}</span>
+                </div>
+            `).join('');
+            document.getElementById('readerVocabList').innerHTML = vocabHtml;
+        }
+        
+        loadData();
+    </script>
+</body>
+</html>
